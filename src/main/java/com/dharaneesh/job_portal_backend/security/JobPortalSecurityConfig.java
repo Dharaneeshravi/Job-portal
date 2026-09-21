@@ -6,22 +6,19 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -35,47 +32,50 @@ public class JobPortalSecurityConfig {
     @Qualifier("securedPaths")
     private final List<String> privatePaths;
 
+    @Qualifier("adminpaths")
+    private final List<String> adminpaths;
+
+    private final AuthenticationProvider authenticationProvider;
+
 
     @Bean
     SecurityFilterChain customSecurityFilterChain(HttpSecurity http) {
 
              return  http
+//                     .csrf(csrfConfif->csrfConfif
+//                             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+//                             .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+//                     )
+                     .csrf(AbstractHttpConfigurer::disable)
+
                      .authorizeHttpRequests(request->{
 
                          publicPaths.forEach(path-> request.requestMatchers(path).permitAll());
                          privatePaths.forEach(path->request.requestMatchers(path).authenticated());
+                         adminpaths.forEach(path->request.requestMatchers(path).hasRole("ADMIN"));
                          request.anyRequest().denyAll();
                      })
                        .addFilterBefore(new JwtTokenValidatorFilter(publicPaths), BasicAuthenticationFilter.class)
                        .cors(Customizer.withDefaults())
-                       .csrf(AbstractHttpConfigurer::disable)
                        .formLogin(AbstractHttpConfigurer::disable)
                        .httpBasic(Customizer.withDefaults()).build();
 
     }
 
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-
-       var admin= User.builder().username("admin")
-                .password(passwordEncoder().encode("admin")).roles("ADMIN").build();
-
-       var user= User.builder().username("user").password(passwordEncoder().encode("user")).roles("USER").build();
-
-       return new InMemoryUserDetailsManager(admin,user);
-    }
 
     @Bean
-    public AuthenticationManager authenticationManagerBean() {
-
-        var authentication=new DaoAuthenticationProvider(userDetailsService());
-        authentication.setPasswordEncoder(passwordEncoder());
-       return new ProviderManager(authentication);
+    public AuthenticationManager authenticationManagerBean(AuthenticationProvider authenticationProvider) {
+       return new ProviderManager(authenticationProvider);
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    private CompromisedPasswordChecker compromisedPasswordChecker() {
+        return new HaveIBeenPwnedRestApiPasswordChecker();
     }
 }

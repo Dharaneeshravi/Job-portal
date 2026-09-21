@@ -1,14 +1,13 @@
 package com.dharaneesh.job_portal_backend.security.util;
 
 import com.dharaneesh.job_portal_backend.constants.ApplicationConstants;
+import com.dharaneesh.job_portal_backend.entity.JobPortalUser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.security.autoconfigure.SecurityProperties;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -29,10 +28,12 @@ public class JwtUtils {
 
         SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 
-        UserDetails fetchUser= (UserDetails) authentication.getPrincipal();
+        JobPortalUser fetchUser= (JobPortalUser) authentication.getPrincipal();
 
        return  Jwts.builder().issuer("jobPortal").subject("payload")
-                .claim("userName",fetchUser.getUsername())
+                .claim("name",fetchUser.getName())
+                .claim("email",fetchUser.getEmail())
+                .claim("mobileNumber",fetchUser.getMobileNumber())
                 .claim("role",authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")))
                 .issuedAt(new Date())
                 .expiration(new Date((new Date()).getTime()+24*60*60*1000))

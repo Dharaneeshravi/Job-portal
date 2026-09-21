@@ -57,7 +57,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                                  .parseSignedClaims(jwt)
                                  .getPayload();
 
-                         String userName = String.valueOf(claims.get("userName"));
+                         String userName = String.valueOf(claims.get("email"));
                          String role = String.valueOf(claims.get("role"));
 
                          Authentication authentication = new UsernamePasswordAuthenticationToken(userName,

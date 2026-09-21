@@ -8,10 +8,13 @@ import com.dharaneesh.job_portal_backend.repository.CompanyRepository;
 import com.dharaneesh.job_portal_backend.dto.CompanyDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CompanyServiceImpl implements ICompanyService {
 
     private final CompanyRepository companyRepository;
@@ -20,7 +23,7 @@ public class CompanyServiceImpl implements ICompanyService {
     @Override
     public List<CompanyDto> getAllCompanies() {
 
-        List<Company> companyList=companyRepository.findAll();
+        List<Company> companyList=companyRepository.findAllWithJobStatus("ACTIVE");
        return companyList.stream().map(this::transferCompanyToDto).toList();
     }
 

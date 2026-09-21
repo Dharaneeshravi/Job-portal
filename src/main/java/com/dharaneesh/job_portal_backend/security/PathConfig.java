@@ -11,6 +11,7 @@ public class PathConfig {
     public List<String> publicPath()
     {
         return List.of(
+                "/api/register/public",
                 "/api/auth/login/public",
                 "/api/companies/public",
                 "/api/contacts/public",
@@ -27,6 +28,15 @@ public class PathConfig {
     public List<String> securedPaths() {
         return List.of(
                 "/api/**"
+        );
+    }
+
+    @Bean(name = "adminpaths")
+    public List<String> adminPaths() {
+        return List.of(
+                "/api/contact/admin",
+                "/api/contact/sort/admin",
+                "/api/contact/${id}/status/admin"
         );
     }
 }

@@ -58,7 +58,8 @@ public class JobPortalSecurityConfig {
                        .addFilterBefore(new JwtTokenValidatorFilter(publicPaths), BasicAuthenticationFilter.class)
                        .cors(Customizer.withDefaults())
                        .formLogin(AbstractHttpConfigurer::disable)
-                       .httpBasic(Customizer.withDefaults()).build();
+                       .httpBasic(Customizer.withDefaults())
+                       .build();
 
     }
 

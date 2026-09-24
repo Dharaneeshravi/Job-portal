@@ -7,6 +7,7 @@ import com.dharaneesh.job_portal_backend.entity.Job;
 import com.dharaneesh.job_portal_backend.repository.CompanyRepository;
 import com.dharaneesh.job_portal_backend.dto.CompanyDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,57 @@ public class CompanyServiceImpl implements ICompanyService {
 
         List<Company> companyList=companyRepository.findAllWithJobStatus("ACTIVE");
        return companyList.stream().map(this::transferCompanyToDto).toList();
+    }
+
+    @Override
+    @Transactional
+    public boolean createCompany(CompanyDto companyDto) {
+
+        Company company=tarnsferCompanyDtoToCompany(companyDto);
+        Company savedCompany=companyRepository.save(company);
+        return savedCompany.getId()!=null && savedCompany.getId()>0;
+    }
+
+    @Override
+    public List<CompanyDto> getAllCompanyForAdmin() {
+
+        List<Company> companyList = companyRepository.findAll();
+        return companyList.stream().map(this::transferCompanyToDtoForAdmin).toList();
+    }
+
+    @Override
+    @Transactional
+    public boolean updateCompanyDetails(Long id, CompanyDto companyDto) {
+
+        int updatedCompany=companyRepository.updateCompanyDetails(
+                id,companyDto.name(),companyDto.logo(),companyDto.industry(),
+                companyDto.size(),companyDto.rating(),companyDto.locations(),
+                companyDto.founded(),companyDto.description(),companyDto.employees(),companyDto.website()
+        );
+
+        return updatedCompany>0;
+    }
+
+    @Override
+    @Transactional
+    public void deleteCompanyDetails(Long id) {
+
+        companyRepository.deleteById(id);
+    }
+
+    private CompanyDto transferCompanyToDtoForAdmin(Company company) {
+
+        return new CompanyDto(company.getId(),company.getName(),company.getLogo(),
+                company.getIndustry(), company.getSize(),company.getRating(),company.getLocations(),
+                company.getFounded(),company.getDescription(),company.getEmployees(),company.getWebsite(),
+                company.getCreatedAt(),null);
+    }
+
+    private Company tarnsferCompanyDtoToCompany(CompanyDto companyDto) {
+
+        Company company=new Company();
+        BeanUtils.copyProperties(companyDto, company);
+        return company;
     }
 
     private CompanyDto transferCompanyToDto(Company company) {

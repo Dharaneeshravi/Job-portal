@@ -8,6 +8,7 @@ import com.dharaneesh.job_portal_backend.repository.CompanyRepository;
 import com.dharaneesh.job_portal_backend.dto.CompanyDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,7 @@ public class CompanyServiceImpl implements ICompanyService {
         return savedCompany.getId()!=null && savedCompany.getId()>0;
     }
 
+    @Cacheable("companies")
     @Override
     public List<CompanyDto> getAllCompanyForAdmin() {
 

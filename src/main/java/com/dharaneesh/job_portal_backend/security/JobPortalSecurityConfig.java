@@ -35,7 +35,11 @@ public class JobPortalSecurityConfig {
     @Qualifier("adminpaths")
     private final List<String> adminpaths;
 
-    private final AuthenticationProvider authenticationProvider;
+    @Qualifier("employerpaths")
+    private final List<String> employerPaths;
+
+    @Qualifier("jobseekerPaths")
+    private final List<String> jobseekerPaths;
 
 
     @Bean
@@ -53,6 +57,8 @@ public class JobPortalSecurityConfig {
                          publicPaths.forEach(path-> request.requestMatchers(path).permitAll());
                          privatePaths.forEach(path->request.requestMatchers(path).authenticated());
                          adminpaths.forEach(path->request.requestMatchers(path).hasRole("ADMIN"));
+                         employerPaths.forEach(path->request.requestMatchers(path).hasRole("EMPLOYER"));
+                         jobseekerPaths.forEach(path->request.requestMatchers(path).hasRole("JOB_SEEKER"));
                          request.anyRequest().denyAll();
                      })
                        .addFilterBefore(new JwtTokenValidatorFilter(publicPaths), BasicAuthenticationFilter.class)

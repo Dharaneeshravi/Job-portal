@@ -1,7 +1,10 @@
 package com.dharaneesh.job_portal_backend.user.service;
 
-import com.dharaneesh.job_portal_backend.dto.UserDto;
+import com.dharaneesh.job_portal_backend.dto.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IUserService {
@@ -10,4 +13,24 @@ public interface IUserService {
     UserDto elevateToEmployer(Long userId);
 
     UserDto assignCompanyToEmployer(Long userId, Long companyId);
+
+    ProfileDto createOrUpdateProfile(String userEmail, String profileJson, MultipartFile profilePicture, MultipartFile resume) throws JsonProcessingException;
+
+    ProfileDto getProfile(String userEmail);
+
+    ProfileDto getProfilePicture(String userEmail);
+
+    ProfileDto getResume(String userEmail);
+
+    JobDto saveJob(Long jobId, String userEmail);
+
+    void unsaveJob(Long jobId, String userEmail);
+
+    List<JobDto> getSavedJobs(String userEmail);
+
+    JobApplicationDto applyForJob(String userEmail, ApplyJobRequestDto applyJobRequestDto);
+
+    void withdrawApplication(String userEmail, Long jobId);
+
+    List<JobApplicationDto> getJobSeekerApplication(String userEmail);
 }

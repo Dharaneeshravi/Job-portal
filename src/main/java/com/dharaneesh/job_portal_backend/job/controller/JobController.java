@@ -1,6 +1,8 @@
 package com.dharaneesh.job_portal_backend.job.controller;
 
+import com.dharaneesh.job_portal_backend.dto.JobApplicationDto;
 import com.dharaneesh.job_portal_backend.dto.JobDto;
+import com.dharaneesh.job_portal_backend.dto.UpdateJobApplicationDto;
 import com.dharaneesh.job_portal_backend.job.service.IJobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,5 +46,24 @@ public class JobController {
         String employerEmail=authentication.getName();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(jobService.createJob(jobDto,employerEmail));
+    }
+
+    @GetMapping(path = "/application/{jobId}/employer")
+    public ResponseEntity<List<JobApplicationDto>> getApplicationByJobForEmployer(@PathVariable("jobId") String jobId) {
+
+        return ResponseEntity.ok(jobService.getApplicationByJobForEmployer(jobId));
+    }
+
+    @PatchMapping(path = "/application/employer")
+    public ResponseEntity<String> updateJobApplication(@RequestBody @Valid UpdateJobApplicationDto updateJobApplicationDto) {
+
+       boolean isUpdated= jobService.updateJobApplication(updateJobApplicationDto);
+
+       if(isUpdated) {
+           return ResponseEntity.ok("Job application updated successfully");
+       }else
+       {
+           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Job application update failed");
+       }
     }
 }

@@ -1,9 +1,13 @@
 package com.dharaneesh.job_portal_backend.utils;
 
 import com.dharaneesh.job_portal_backend.constants.ApplicationConstants;
+import com.dharaneesh.job_portal_backend.dto.JobApplicationDto;
 import com.dharaneesh.job_portal_backend.dto.JobDto;
+import com.dharaneesh.job_portal_backend.dto.ProfileDto;
 import com.dharaneesh.job_portal_backend.entity.Job;
+import com.dharaneesh.job_portal_backend.entity.JobApplication;
 import com.dharaneesh.job_portal_backend.entity.JobPortalUser;
+import com.dharaneesh.job_portal_backend.entity.Profile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -60,4 +64,44 @@ public class ApplicationUtils {
                 job.getStatus()
         );
     }
+
+
+    public static JobApplicationDto mapToJobApplicationDto(JobApplication application) {
+
+        ProfileDto profileDto = null;
+        Profile profile = application.getUser().getProfile();
+        if (profile != null) {
+            profileDto = new ProfileDto(
+                    profile.getId(),
+                    profile.getUser().getId(),
+                    profile.getJobTitle(),
+                    profile.getLocation(),
+                    profile.getExperienceLevel(),
+                    profile.getProfessionalBio(),
+                    profile.getPortfolioWebsite(),
+                    profile.getProfilePicture(),
+                    profile.getProfilePictureName(),
+                    profile.getProfilePictureType(),
+                    profile.getResume(),
+                    profile.getResumeName(),
+                    profile.getResumeType(),
+                    profile.getCreatedAt(),
+                    profile.getUpdatedAt()
+            );
+        }
+        return new JobApplicationDto(
+                application.getId(),
+                application.getUser().getId(),
+                application.getUser().getName(),
+                application.getUser().getEmail(),
+                application.getUser().getMobileNumber(),
+                profileDto,
+                ApplicationUtils.transferJobToDto(application.getJob()),
+                application.getAppliedAt(),
+                application.getStatus(),
+                application.getCoverLetter(),
+                application.getNotes()
+        );
+    }
+
 }

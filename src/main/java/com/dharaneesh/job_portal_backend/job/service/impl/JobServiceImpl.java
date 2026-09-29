@@ -1,9 +1,14 @@
 package com.dharaneesh.job_portal_backend.job.service.impl;
 
+import com.dharaneesh.job_portal_backend.dto.JobApplicationDto;
+import com.dharaneesh.job_portal_backend.dto.JobApplicationStatus;
 import com.dharaneesh.job_portal_backend.dto.JobDto;
+import com.dharaneesh.job_portal_backend.dto.UpdateJobApplicationDto;
 import com.dharaneesh.job_portal_backend.entity.Job;
+import com.dharaneesh.job_portal_backend.entity.JobApplication;
 import com.dharaneesh.job_portal_backend.entity.JobPortalUser;
 import com.dharaneesh.job_portal_backend.job.service.IJobService;
+import com.dharaneesh.job_portal_backend.repository.JobApplicationRepository;
 import com.dharaneesh.job_portal_backend.repository.JobPortalUserRepository;
 import com.dharaneesh.job_portal_backend.repository.JobRepository;
 import com.dharaneesh.job_portal_backend.utils.ApplicationUtils;
@@ -21,6 +26,7 @@ import java.util.List;
 public class JobServiceImpl implements IJobService {
 
     private final JobPortalUserRepository jobPortalUserRepository;
+    private final JobApplicationRepository jobApplicationRepository;
     private final JobRepository jobRepository;
 
     @Override
@@ -82,6 +88,22 @@ public class JobServiceImpl implements IJobService {
         job.setCompany(employer.getCompany());
         Job savedJob=jobRepository.save(job);
         return ApplicationUtils.transferJobToDto(savedJob);
+    }
+
+    @Override
+    public List<JobApplicationDto> getApplicationByJobForEmployer(String jobId) {
+
+        return jobApplicationRepository.findByJobIdOrderByAppliedAtAsc(jobId)
+                .stream().map(ApplicationUtils::mapToJobApplicationDto).toList();
+    }
+
+    @Override
+    @Transactional
+    public boolean updateJobApplication(UpdateJobApplicationDto dto) {
+
+        int  updatedRow=jobApplicationRepository.updateStatusAndNotesById(
+        dto.status().name(),dto.notes(),dto.applicationId(),ApplicationUtils.getLoggedInUser());
+        return updatedRow>0;
     }
 
     private Job mapJobDtoToJob(JobDto jobDto) {

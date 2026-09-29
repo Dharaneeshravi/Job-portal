@@ -213,7 +213,7 @@ public class UserServiceImpl implements IUserService {
 
         job.setApplicationsCount(job.getApplicationsCount()!=null?job.getApplicationsCount()+1:1);
         jobRepository.save(job);
-        return mapToJobApplicationDto(savedJobApplication);
+        return ApplicationUtils.mapToJobApplicationDto(savedJobApplication);
 
     }
 
@@ -247,46 +247,9 @@ public class UserServiceImpl implements IUserService {
         JobPortalUser user=jobPortalUserRepository.findByEmail(userEmail)
                 .orElseThrow(()->new RuntimeException("User not found ID: "+userEmail));
 
-        return user.getJobApplications().stream().map(this::mapToJobApplicationDto).toList();
+        return user.getJobApplications().stream().map(ApplicationUtils::mapToJobApplicationDto).toList();
     }
 
-    private JobApplicationDto mapToJobApplicationDto(JobApplication application) {
-
-        ProfileDto profileDto = null;
-        Profile profile = application.getUser().getProfile();
-        if (profile != null) {
-            profileDto = new ProfileDto(
-                    profile.getId(),
-                    profile.getUser().getId(),
-                    profile.getJobTitle(),
-                    profile.getLocation(),
-                    profile.getExperienceLevel(),
-                    profile.getProfessionalBio(),
-                    profile.getPortfolioWebsite(),
-                    profile.getProfilePicture(),
-                    profile.getProfilePictureName(),
-                    profile.getProfilePictureType(),
-                    profile.getResume(),
-                    profile.getResumeName(),
-                    profile.getResumeType(),
-                    profile.getCreatedAt(),
-                    profile.getUpdatedAt()
-            );
-        }
-        return new JobApplicationDto(
-                application.getId(),
-                application.getUser().getId(),
-                application.getUser().getName(),
-                application.getUser().getEmail(),
-                application.getUser().getMobileNumber(),
-                profileDto,
-                ApplicationUtils.transferJobToDto(application.getJob()),
-                application.getAppliedAt(),
-                application.getStatus(),
-                application.getCoverLetter(),
-                application.getNotes()
-        );
-    }
 
     private ProfileDto mapToprofileDto(Profile profile, boolean includeBinaryData) {
         ProfileDto dto;
